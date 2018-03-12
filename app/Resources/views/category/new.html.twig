@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Nueva categoria</h1>
+
+    {{ form_start(form) }}
+        <div class="col-12 col-lg-6 form-group">
+            {{ form_row(form.code) }}
+        </div>
+        <div class="col-12 col-lg-6 form-group">
+            {{ form_row(form.name) }}
+        </div>
+        <div class="col-12 col-lg-6 form-group">
+            {{ form_row(form.description) }}
+        </div>
+        <div class="col-12 col-lg-6 form-check">
+            {{ form_row(form.active) }}
+        </div>
+        <div class="row justify-content-center">
+            <input type="submit" value="Crear" class="btn btn-success" />
+        </div>
+    {{ form_end(form) }}
+
+    <a href="{{ path('category_index') }}">Volver a listado</a>
+
+{% endblock %}

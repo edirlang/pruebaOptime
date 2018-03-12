@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Listado de categorias</h1>
+
+    <table class="table table-responsive">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Codigo</th>
+                <th>Nambre</th>
+                <th>Descripción</th>
+                <th>Activo</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for category in categories %}
+            <tr>
+                <td>{{ category.id }}</td>
+                <td>{{ category.code }}</td>
+                <td>{{ category.name }}</td>
+                <td>{{ category.description }}</td>
+                <td>{% if category.active %}Si{% else %}No{% endif %}</td>
+                <td>
+                    <a href="{{ path('category_edit', { 'id': category.id }) }}" class="btn btn-block btn-info">Editar</a>
+
+                    {% if category.active %}
+                        <a href="{{ path('category_unActive', { 'id': category.id }) }}" class="btn btn-block btn-danger">Desactivar</a>
+                    {% else %}
+                        <a href="{{ path('category_active', { 'id': category.id }) }}" class="btn btn-block btn-success">Activar</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('category_new') }}">Create a new category</a>
+        </li>
+    </ul>
+{% endblock %}
