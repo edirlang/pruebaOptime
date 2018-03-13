@@ -1,16 +1,32 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <h1>Product creation</h1>
+    <h1>Nuevo producto</h1>
 
     {{ form_start(form) }}
-        {{ form_widget(form) }}
-        <input type="submit" value="Create" />
+        <div class="col-12 col-lg-6">
+            <div class="form-group">
+                {{ form_row(form.code) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.name) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.description) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.price) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.category) }}
+            </div>
+            <div class="row justify-content-center">
+                <input type="submit" value="Crear" class="btn btn-success" />
+            </div>
+        </div>
     {{ form_end(form) }}
+    <div class="row">
+        <a href="{{ path('product_index') }}" class="btn btn-danger">Volver</a>
+    </div>
 
-    <ul>
-        <li>
-            <a href="{{ path('productos_index') }}">Back to the list</a>
-        </li>
-    </ul>
 {% endblock %}

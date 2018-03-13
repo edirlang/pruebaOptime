@@ -5,12 +5,23 @@ namespace AppBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Category
  *
  * @ORM\Table(name="category")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\CategoryRepository")
+ * @UniqueEntity(
+ *     fields= "code",
+ *     errorPath="code",
+ *     message="El codigo pertenece a otra categoria."
+ * )
+ * @UniqueEntity(
+ *     fields= "name",
+ *     errorPath="name",
+ *     message="El nombre pertenece a otra categoria."
+ * )
  */
 class Category
 {

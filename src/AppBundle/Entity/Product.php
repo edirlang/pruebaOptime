@@ -5,12 +5,24 @@ namespace AppBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 /**
  * Product
  *
  * @ORM\Table(name="product")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ProductRepository")
+ * @UniqueEntity(
+ *     fields= "code",
+ *     errorPath="code",
+ *     message="El codigo pertenece a otro producto."
+ * )
+ * @UniqueEntity(
+ *     fields= "name",
+ *     errorPath="name",
+ *     message="El nombre pertenece a otro producto."
+ * )
  */
 class Product
 {

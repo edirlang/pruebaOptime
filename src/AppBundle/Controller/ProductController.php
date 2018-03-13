@@ -3,9 +3,13 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Product;
+use AppBundle\Service\ProductService;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Product controller.
@@ -17,18 +21,95 @@ class ProductController extends Controller
     /**
      * Lists all product entities.
      *
-     * @Route("/", name="product_index")
-     * @Method("GET")
+     * @Route("/lista/{index}/{code}/{name}/{category}", name="product_index")
+     * @Method({"GET","POST"})
      */
-    public function indexAction()
+    public function indexAction(Request $request, $index = 1, $code = '', $name = '', $category = '')
     {
-        $em = $this->getDoctrine()->getManager();
+        $form = $this->createFormFilters();
+        $form->handleRequest($request);
 
-        $products = $em->getRepository('AppBundle:Product')->getActiveProducts();
+        $fileters = [
+            'code' => $code,
+            'name' => $name,
+            'category' => $category
+        ];
+
+        if($form->isValid()){
+            if($this->checkFilterChange($fileters, $form)){
+                $index = 1;
+            }
+            $this->uploadFormFilters($form,$fileters);
+            $code = $fileters['code'];
+            $name = $fileters['name'];
+            $category = $fileters['category'];
+        }else{
+            $this->uploadFiltersForm($form, $fileters);
+        }
+        $resultFilterAndPagination = $this->container->get(ProductService::class)->filtersProducts($fileters, $index);
 
         return $this->render('product/index.html.twig', array(
-            'products' => $products,
+            'products' => $resultFilterAndPagination['products'],
+            'max_index' => $resultFilterAndPagination['max_index'],
+            'index' => $index,
+            'filters' => $fileters,
+            'form_filter' => $form->createView()
         ));
+    }
+
+    private function createFormFilters(){
+        $form = $this->get("form.factory")->createNamedBuilder('filter')
+            ->add("code", TextType::class,[
+                'label' => 'Codigo',
+                'required' => false,
+                'label_attr' => ['class' => ''],
+                'attr' => ['class' => 'form-control','placeholder' => 'Codigo']
+                ])
+            ->add("name", TextType::class,[
+                'label' => 'Nombre',
+                'required' => false,
+                'label_attr' => ['class' => ''],
+                'attr' => ['class' => 'form-control','placeholder' => 'Nombre']
+            ])
+            ->add("category", TextType::class,[
+                'label' => 'Categoria',
+                'required' => false,
+                'label_attr' => ['class' => ''],
+                'attr' => ['class' => 'form-control','placeholder' => 'Categoria']
+            ])
+            ->getForm();
+
+        return $form;
+    }
+
+    private function uploadFormFilters($form, &$filters){
+        $filters = [
+            'code' => $form->get('code')->getData(),
+            'name' => $form->get('name')->getData(),
+            'category' => $form->get('category')->getData()
+        ];
+        return $filters;
+    }
+
+    private function checkFilterChange($filters, $form){
+        if($filters['code'] != $form->get('code')->getData()){
+            return true;
+        }
+        if($filters['name'] != $form->get('name')->getData()){
+            return true;
+        }
+        if($filters['category'] != $form->get('category')->getData()){
+            return true;
+        }
+        return false;
+    }
+
+    private function uploadFiltersForm(&$form, $filters){
+        $form->get('code')->setData($filters['code']);
+        $form->get('name')->setData($filters['name']);
+        $form->get('category')->setData($filters['category']);
+
+        return $form;
     }
 
     /**
@@ -48,28 +129,12 @@ class ProductController extends Controller
             $em->persist($product);
             $em->flush();
 
-            return $this->redirectToRoute('productos_show', array('id' => $product->getId()));
+            return $this->redirectToRoute('product_index');
         }
 
         return $this->render('product/new.html.twig', array(
             'product' => $product,
             'form' => $form->createView(),
-        ));
-    }
-
-    /**
-     * Finds and displays a product entity.
-     *
-     * @Route("/{id}", name="productos_show")
-     * @Method("GET")
-     */
-    public function showAction(Product $product)
-    {
-        $deleteForm = $this->createDeleteForm($product);
-
-        return $this->render('product/show.html.twig', array(
-            'product' => $product,
-            'delete_form' => $deleteForm->createView(),
         ));
     }
 
@@ -81,20 +146,18 @@ class ProductController extends Controller
      */
     public function editAction(Request $request, Product $product)
     {
-        $deleteForm = $this->createDeleteForm($product);
         $editForm = $this->createForm('AppBundle\Form\ProductType', $product);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('productos_edit', array('id' => $product->getId()));
+            return $this->redirectToRoute('product_index');
         }
 
         return $this->render('product/edit.html.twig', array(
             'product' => $product,
             'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
         ));
     }
 
@@ -104,33 +167,14 @@ class ProductController extends Controller
      * @Route("/{id}", name="product_delete")
      * @Method("DELETE")
      */
-    public function deleteAction(Request $request, Product $product)
+    public function deleteAction(Request $request, $id = null)
     {
-        $form = $this->createDeleteForm($product);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($product);
-            $em->flush();
-        }
-
-        return $this->redirectToRoute('productos_index');
+        $product = $this->getDoctrine()->getRepository("AppBundle:Product")->find($id);
+        $em = $this->getDoctrine()->getManager();
+        $em->remove($product);
+        $em->flush();
+        return new JsonResponse(['success' => true]);
     }
 
-    /**
-     * Creates a form to delete a product entity.
-     *
-     * @param Product $product The product entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createDeleteForm(Product $product)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('productos_delete', array('id' => $product->getId())))
-            ->setMethod('DELETE')
-            ->getForm()
-        ;
-    }
+
 }

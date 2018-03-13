@@ -3,6 +3,28 @@
 {% block body %}
     <h1>Lista de productos</h1>
 
+    <a href="{{ path('productos_new') }}" class="btn btn-primary">Nuevo Producto</a>
+    <div class="card">
+        <div class="card-body">
+            {{ form_start(form_filter) }}
+            <div class="row">
+                <div class="col-12 col-md-4">
+                    {{ form_row(form_filter.code) }}
+                </div>
+                <div class="col-12 col-md-4">
+                    {{ form_row(form_filter.name) }}
+                </div>
+                <div class="col-12 col-md-4">
+                    {{ form_row(form_filter.category) }}
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <input type="submit" value="Filtar" class="btn btn-success">
+            </div>
+            {{ form_end(form_filter) }}
+        </div>
+
+    </div>
     <table class="table">
         <thead>
             <tr>
@@ -17,29 +39,91 @@
         <tbody>
         {% for product in products %}
             <tr>
-                <td><a href="{{ path('productos_show', { 'id': product.id }) }}">{{ product.id }}</a></td>
+                <td>{{ product.id }}</td>
                 <td>{{ product.code }}</td>
                 <td>{{ product.name }}</td>
                 <td>{{ product.description }}</td>
                 <td>{{ product.price }}</td>
                 <td>
-                    <ul>
-                        <li>
-                            <a href="{{ path('product_show', { 'id': product.id }) }}">show</a>
-                        </li>
-                        <li>
-                            <a href="{{ path('product_edit', { 'id': product.id }) }}">edit</a>
-                        </li>
-                    </ul>
+                    <a id="btn-delete" product_id="{{ product.id }}" class="btn-delete btn btn-block btn-danger text-white">Eliminar</a>
+                    <a href="{{ path('product_edit', { 'id': product.id }) }}" class="btn btn-block btn-info">Editar</a>
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <ul>
-        <li>
-            <a href="{{ path('productos_new') }}">Create a new product</a>
-        </li>
-    </ul>
+    <div class="row justify-content-center">
+        {% if max_index > 1 %}
+            <nav>
+                <ul class="pagination">
+                    {% if index > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ path("product_index",{
+                                'index': (index-1), 'code' : filters.code, 'name' : filters.name, 'category' : filters.category }) }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                            <span class="sr-only">Anterior</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for i in 1..max_index %}
+                        <li class="page-item {% if index == i %} active {% endif %}"><a class="page-link" href="{{ path("product_index",{
+                                'index': i, 'code' : filters.code, 'name' : filters.name, 'category' : filters.category }) }}">{{ i }}</a></li>
+                    {% endfor %}
+                    {% if index < max_index %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path("product_index",{
+                            'index': (index+1), 'code' : filters.code, 'name' : filters.name, 'category' : filters.category }) }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                            <span class="sr-only">Siguiente</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+
+    <div id="alert-confirt" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Alerta</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estas seguro de eliminar el producto?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" product_id="0" class="btn btn-primary" id="btn-confirt" data-dismiss="modal">Si</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">NO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script >
+        $(document).ready(function () {
+            $(".btn-delete").click(function () {
+                $("#btn-confirt").attr("product_id",$(this).attr("product_id"));
+                $("#alert-confirt").modal();
+            });
+
+            $("#btn-confirt").click(function () {
+                var id = $(this).attr("product_id");
+                var url = "{{ path('product_delete') }}/"+id;
+                $.ajax({
+                    url: url,
+                    method: 'DELETE'
+                }).done(function (response) {
+                    console.log(response);
+                    window.location.reload();
+                });
+            });
+        });
+    </script>
 {% endblock %}
