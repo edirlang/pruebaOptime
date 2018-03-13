@@ -3,13 +3,13 @@
 {% block body %}
     <h1>Listado de categorias</h1>
 
-    <table class="table table-responsive">
+    <table class="table" id="table_categories">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Codigo</th>
-                <th>Nambre</th>
-                <th>Descripción</th>
+                <th class="sortStyle">ID</th>
+                <th class="sortStyle">Codigo</th>
+                <th class="sortStyle">Nambre</th>
+                <th class="sortStyle">Descripción</th>
                 <th>Activo</th>
                 <th></th>
             </tr>
@@ -41,4 +41,12 @@
             <a href="{{ path('category_new') }}">Create a new category</a>
         </li>
     </ul>
+{% endblock %}
+
+{% block javascripts %}
+    <script >
+        $(document).ready(function () {
+            $("#table_categories").tablesort();
+        });
+    </script>
 {% endblock %}

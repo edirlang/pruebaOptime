@@ -4,6 +4,8 @@
         <meta charset="UTF-8" />
         <title>{% block title %}Prueba de Optime{% endblock %}</title>
         <link rel="stylesheet" href="{{ asset("css/bootstrap.css") }}">
+        <link rel="stylesheet" href="{{ asset("css/main.css") }}">
+
         {% block stylesheets %}{% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     </head>
@@ -31,6 +33,7 @@
 
         <script src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
         <script src="{{ asset("js/bootstrap.js") }}"></script>
+        <script src="{{ asset('js/jq.tablesort.js') }}"></script>
         {% block javascripts %}{% endblock %}
     </body>
 </html>
