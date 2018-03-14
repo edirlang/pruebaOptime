@@ -14,6 +14,7 @@
             <div class="form-group">
                 {{ form_row(edit_form.description) }}
             </div>
+
             <div class="form-check form-check-inline">
                 {{ form_row(edit_form.active) }}
             </div>
@@ -23,6 +24,6 @@
         </div>
     {{ form_end(edit_form) }}
 
-    <a href="{{ path('category_index') }}">Volver</a>
+    <a href="{{ path('category_index') }}" class="btn btn-danger">Volver</a>
 
 {% endblock %}

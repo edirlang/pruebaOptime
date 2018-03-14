@@ -15,7 +15,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class ProductService
 {
-    const PRODUCTS_PER_LIST = 3;
+    const PRODUCTS_PER_LIST = 10;
     private $entityManager;
 
     function __construct(EntityManager $manager)

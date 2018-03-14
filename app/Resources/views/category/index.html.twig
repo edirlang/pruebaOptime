@@ -3,6 +3,7 @@
 {% block body %}
     <h1>Listado de categorias</h1>
 
+    <a href="{{ path('category_new') }}" class="btn btn-primary">Nueva Categoria</a>
     <table class="table" id="table_categories">
         <thead>
             <tr>
@@ -36,11 +37,6 @@
         </tbody>
     </table>
 
-    <ul>
-        <li>
-            <a href="{{ path('category_new') }}">Create a new category</a>
-        </li>
-    </ul>
 {% endblock %}
 
 {% block javascripts %}
